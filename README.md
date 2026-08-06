@@ -2,7 +2,7 @@
 
 Fly Usage Reporter runs once a day. It reads Fly.io Machine configuration and Prometheus metrics for the previous 24 hours, then estimates infrastructure cost and emails the result. GitHub Actions supplies the scheduler and runtime, so the project needs no server of its own.
 
-Companion post: [dvoorhees.com/2026-08-06-daily-fly-io-usage-cost-estimate](https://dvoorhees.com/2026-08-06-daily-fly-io-usage-cost-estimate)
+Companion post: [Fly.io Doesn't Have a Daily Billing Endpoint, So I Built One](https://dvoorhees.com/2026-08-06-daily-fly-io-usage-cost-estimate)
 
 ## What it does
 
