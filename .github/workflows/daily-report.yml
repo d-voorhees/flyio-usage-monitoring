@@ -1,0 +1,37 @@
+name: Daily Fly.io Usage Report
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send Fly.io report
+        env:
+          FLY_TOKEN: ${{ secrets.FLY_TOKEN }}
+          FLY_ORG_SLUG: ${{ secrets.FLY_ORG_SLUG }}
+          FLY_APPS: ${{ secrets.FLY_APPS }}
+          CPU_RATE_PER_HOUR: ${{ secrets.CPU_RATE_PER_HOUR }}
+          MEMORY_RATE_PER_GB_HOUR: ${{ secrets.MEMORY_RATE_PER_GB_HOUR }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: python fly_usage_report.py
