@@ -109,6 +109,12 @@ def format_network_result(result):
     return f"{total:,.0f}"
 
 
+def format_window_dt(dt):
+    hour = dt.strftime("%I").lstrip("0") or "12"
+    ampm = dt.strftime("%p").lower()
+    return f"{dt.strftime('%m/%d/%Y')} {hour}{ampm}"
+
+
 def send_email(subject, body):
     message = MIMEText(body, "html")
     message["From"] = EMAIL_FROM
@@ -141,10 +147,9 @@ def main():
 
     compute_total = sum(row["total"] for row in machine_rows)
 
-    date_format = "%m/%d/%Y"
     report_lines = [
         "<b>Fly.io Usage Estimate</b>",
-        f"Window: {start.strftime(date_format)} to {end.strftime(date_format)}",
+        f"Window: {format_window_dt(start)} to {format_window_dt(end)}",
         "",
         "This report estimates compute cost from the current Machine "
         "configuration. It does not represent an official Fly invoice.",
