@@ -17,6 +17,8 @@ FLY_APPS = [
 EMAIL_FROM = os.environ["EMAIL_FROM"]
 EMAIL_TO = os.environ["EMAIL_TO"]
 EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
+SMTP_HOST = os.environ["SMTP_HOST"]
+SMTP_PORT = int(os.environ["SMTP_PORT"])
 
 FLY_API = "https://api.machines.dev/v1"
 PROMETHEUS_API = f"https://api.fly.io/prometheus/{FLY_ORG_SLUG}/api/v1"
@@ -113,7 +115,7 @@ def send_email(subject, body):
     message["To"] = EMAIL_TO
     message["Subject"] = subject
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
         server.send_message(message)
 
