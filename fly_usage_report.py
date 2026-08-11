@@ -22,7 +22,10 @@ FLY_API = "https://api.machines.dev/v1"
 PROMETHEUS_API = f"https://api.fly.io/prometheus/{FLY_ORG_SLUG}/api/v1"
 
 HEADERS = {
-    "Authorization": f"Bearer {FLY_TOKEN}",
+    # FLY_TOKEN from `fly tokens create` already includes the "FlyV1 " scheme
+    # prefix, so it's used as-is here. Fly's Machines API tolerates a
+    # "Bearer " prefix in front of that, but the Prometheus API rejects it.
+    "Authorization": FLY_TOKEN,
 }
 
 # Set these from the current Fly pricing page.
