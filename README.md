@@ -46,6 +46,7 @@ Network counters appear in the report as usage data. The current version does no
 ```text
 .
 ├── fly_usage_report.py
+├── calculate_rates.py
 ├── requirements.txt
 └── .github/workflows/daily-report.yml
 ```
@@ -87,11 +88,30 @@ Add the following values under **Settings → Secrets and variables → Actions*
 | `MEMORY_RATE_PER_GB_HOUR` | Memory rate used by the estimator. |
 | `EMAIL_FROM` | SMTP sender address. |
 | `EMAIL_TO` | Report recipient. |
-| `EMAIL_PASSWORD` | SMTP app password. |
+| `EMAIL_PASSWORD` | SMTP account/app password. |
+| `SMTP_HOST` | SMTP server hostname (e.g. `smtp.gmail.com`, `smtp.office365.com`, your provider's mail server). |
+| `SMTP_PORT` | SMTP server port for SSL (typically `465`). |
+
+### Finding CPU_RATE_PER_HOUR and MEMORY_RATE_PER_GB_HOUR
+
+Fly doesn't publish these two numbers directly — it publishes one bundled price per (CPU tier, RAM size), like "shared-cpu-1x @ 256MB = $0.00000075/s." `calculate_rates.py` backs out the per-vCPU and per-GB-RAM components for you:
+
+1. Open [fly.io/docs/about/pricing](https://fly.io/docs/about/pricing/) and find your CPU tier — almost certainly `shared-cpu-1x` unless you know otherwise.
+2. Copy the per-second price for **two different RAM sizes** on that same tier's row(s).
+3. Run:
+
+   ```bash
+   python calculate_rates.py 256:0.00000075 512:0.00000123
+   ```
+
+   (using your own RAM_MB:PRICE_PER_SECOND pairs). It prints the exact `CPU_RATE_PER_HOUR` and `MEMORY_RATE_PER_GB_HOUR` values to paste into GitHub secrets, plus a fit check — if the "predicted" price doesn't match what you gave it, you likely mixed CPU tiers by accident.
+4. To sanity-check the result: after the first live run (see "First run and verification" below), compare the emailed estimate to a real invoice on your Fly org's **Billing** page and re-run the calculator with adjusted inputs if needed.
+
+This only works within one CPU tier — if you later run a mix of `shared-cpu-*` and `performance-*` machines, note the reporting script applies one flat rate to all of them, so pick the tier that matches most of your machines.
 
 Update the CPU and memory rate secrets when Fly's pricing changes. Keeping the rates outside the script means a price change never touches the code.
 
-The script sends mail through `smtp.gmail.com` specifically. If `EMAIL_FROM` is a Gmail address, enable 2-Step Verification on that account and generate an [App Password](https://myaccount.google.com/apppasswords) — `EMAIL_PASSWORD` must be the app password, not the account's login password. To use a different provider, edit the `smtplib.SMTP_SSL` host in `fly_usage_report.py`.
+The script connects over SSL to whatever `SMTP_HOST`/`SMTP_PORT` you configure, so any provider works without touching the code. If `EMAIL_FROM` is a Gmail address, enable 2-Step Verification on that account and generate an [App Password](https://myaccount.google.com/apppasswords) — `EMAIL_PASSWORD` must be the app password, not the account's login password. Other providers (Office 365, a custom domain's mail server, etc.) have their own equivalent of an app/SMTP password — check your provider's docs.
 
 ## Local execution
 
@@ -104,6 +124,8 @@ export MEMORY_RATE_PER_GB_HOUR="..."
 export EMAIL_FROM="..."
 export EMAIL_TO="..."
 export EMAIL_PASSWORD="..."
+export SMTP_HOST="..."
+export SMTP_PORT="..."
 
 python fly_usage_report.py
 ```
@@ -127,7 +149,7 @@ The scheduled job installs the pinned Python dependency and injects repository s
 
 ## First run and verification
 
-1. Push the repo and add all eight secrets (see Configuration).
+1. Push the repo and add all ten secrets (see Configuration).
 2. In the GitHub Actions tab, select the workflow and click **Run workflow** to trigger `workflow_dispatch` manually rather than waiting for the schedule.
 3. Confirm the email arrives and check the Action's run log for errors (auth failures, missing secrets, Prometheus query errors).
 4. Compare the estimated compute total in the email against the actual numbers on your Fly.io billing dashboard for the same window.
@@ -142,6 +164,10 @@ The repository currently has no automated test suite. The first useful tests sho
 The project favors a transparent estimate over a hidden number. Every major input appears in the report or in the repository configuration, so you can compare the result against the Fly dashboard and adjust the model.
 
 The estimate excludes exact Machine state history, Fly invoice adjustments, taxes, credits, volume billing, dedicated IPv4 charges, and final bandwidth charges. A future version could record hourly state snapshots and calculate active runtime per Machine.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## License
 
