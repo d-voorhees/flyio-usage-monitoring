@@ -36,6 +36,10 @@ MEMORY_RATE_PER_GB_HOUR = float(os.environ["MEMORY_RATE_PER_GB_HOUR"])
 
 REQUEST_TIMEOUT = 30
 
+# Fixed GMT-6 offset for display in the email. Fly API calls still use
+# real UTC instants; only the report text is shown in this timezone.
+REPORT_TZ = timezone(timedelta(hours=-6))
+
 
 def get_machines(app_name):
     url = f"{FLY_API}/apps/{app_name}/machines"
@@ -147,9 +151,12 @@ def main():
 
     compute_total = sum(row["total"] for row in machine_rows)
 
+    start_local = start.astimezone(REPORT_TZ)
+    end_local = end.astimezone(REPORT_TZ)
+
     report_lines = [
         "<b>Fly.io Usage Estimate</b>",
-        f"Window: {format_window_dt(start)} to {format_window_dt(end)}",
+        f"Window: {format_window_dt(start_local)} to {format_window_dt(end_local)}",
         "",
         "This report estimates compute cost from the current Machine "
         "configuration. It does not represent an official Fly invoice.",
@@ -184,7 +191,7 @@ def main():
     )
 
     body = "<br>\n".join(report_lines)
-    subject = f"Fly.io usage estimate - {end.date()}"
+    subject = f"Fly.io usage estimate - {end_local.date()}"
 
     send_email(subject, body)
 
