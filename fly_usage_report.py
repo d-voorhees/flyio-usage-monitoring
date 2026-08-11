@@ -110,7 +110,7 @@ def format_network_result(result):
 
 
 def send_email(subject, body):
-    message = MIMEText(body)
+    message = MIMEText(body, "html")
     message["From"] = EMAIL_FROM
     message["To"] = EMAIL_TO
     message["Subject"] = subject
@@ -141,14 +141,17 @@ def main():
 
     compute_total = sum(row["total"] for row in machine_rows)
 
+    date_format = "%m/%d/%Y"
     report_lines = [
-        "Fly.io Usage Estimate",
-        f"Window: {start.isoformat()} to {end.isoformat()}",
+        "<b>Fly.io Usage Estimate</b>",
+        f"Window: {start.strftime(date_format)} to {end.strftime(date_format)}",
         "",
         "This report estimates compute cost from the current Machine "
         "configuration. It does not represent an official Fly invoice.",
         "",
-        "Machines:",
+        f"<b>Estimated compute total: ${compute_total:.4f}</b>",
+        "",
+        "<b>Machines:</b>",
     ]
 
     for row in machine_rows:
@@ -163,13 +166,11 @@ def main():
     report_lines.extend(
         [
             "",
-            f"Estimated compute total: ${compute_total:.4f}",
-            "",
-            "Network metrics (last 24h):",
+            "<b>Network metrics (last 24h):</b>",
             f"- Sent bytes: {format_network_result(sent_result)}",
             f"- Received bytes: {format_network_result(received_result)}",
             "",
-            "Excluded from this first estimate:",
+            "<b>Excluded from this first estimate:</b>",
             "- Volumes",
             "- Exact Fly invoice adjustments",
             "- Region-specific bandwidth pricing",
@@ -177,7 +178,7 @@ def main():
         ]
     )
 
-    body = "\n".join(report_lines)
+    body = "<br>\n".join(report_lines)
     subject = f"Fly.io usage estimate - {end.date()}"
 
     send_email(subject, body)
