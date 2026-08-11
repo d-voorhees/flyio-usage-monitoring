@@ -111,7 +111,15 @@ This only works within one CPU tier — if you later run a mix of `shared-cpu-*`
 
 Update the CPU and memory rate secrets when Fly's pricing changes. Keeping the rates outside the script means a price change never touches the code.
 
-The script connects over SSL to whatever `SMTP_HOST`/`SMTP_PORT` you configure, so any provider works without touching the code. If `EMAIL_FROM` is a Gmail address, enable 2-Step Verification on that account and generate an [App Password](https://myaccount.google.com/apppasswords) — `EMAIL_PASSWORD` must be the app password, not the account's login password. Other providers (Office 365, a custom domain's mail server, etc.) have their own equivalent of an app/SMTP password — check your provider's docs.
+The script connects over SSL to whatever `SMTP_HOST`/`SMTP_PORT` you configure, so any provider works without touching the code.
+
+**Using Gmail:**
+
+1. Enable 2-Step Verification on the `EMAIL_FROM` Google account.
+2. Generate an [App Password](https://myaccount.google.com/apppasswords) — `EMAIL_PASSWORD` must be this app password, not the account's login password.
+3. Set `SMTP_HOST` to `smtp.gmail.com` and `SMTP_PORT` to `465`.
+
+**Using another provider:** set `SMTP_HOST`/`SMTP_PORT` to that provider's SSL SMTP endpoint (check their docs — a common alternate port is `587`, but that's usually STARTTLS, not the implicit SSL this script uses, so confirm SSL support on `465` or whichever port you pick). `EMAIL_PASSWORD` is whatever that provider considers its SMTP/app password — often not the same as the account's normal login password.
 
 ## Local execution
 
