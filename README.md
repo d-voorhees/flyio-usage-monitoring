@@ -1,5 +1,7 @@
 # Fly.io Usage Reporter
 
+**Version:** 1.4 — see [CHANGELOG.md](CHANGELOG.md) for history.
+
 Fly Usage Reporter runs once a day. It reads Fly.io Machine configuration and Prometheus metrics for the previous 24 hours, then estimates infrastructure cost and emails the result. GitHub Actions supplies the scheduler and runtime, so the project needs no server of its own.
 
 Companion post: [Fly.io Doesn't Have a Daily Billing Endpoint, So I Built One](http://dvoorhees.com/2026/08/06/fly-io-doesnt-have-a-daily-billing-endpoint-so-i-built-one/)
@@ -10,7 +12,7 @@ Companion post: [Fly.io Doesn't Have a Daily Billing Endpoint, So I Built One](h
 - Reads CPU count, memory allocation, and current Machine state.
 - Queries Fly Prometheus for network activity during the reporting window.
 - Estimates compute cost from CPU and memory rates you configure, not from anything hardcoded.
-- Sends a plain-text report through SMTP.
+- Sends an HTML report through SMTP.
 
 The report is an operational estimate. Fly's organization billing records remain the source for official charges.
 
