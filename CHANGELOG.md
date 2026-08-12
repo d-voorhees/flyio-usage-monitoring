@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.4] - 2026-08-12
+
+### Changed
+
+- Removed the `FLY_APPS` secret. The script now calls `GET /v1/apps?org_slug=...` on the Machines API to discover every app in `FLY_ORG_SLUG` at run time, so new apps appear in the next report automatically instead of requiring a manual secret update.
+
+## [1.3] - 2026-08-11
+
+### Changed
+
+- Email body is now sent as HTML (`MIMEText(..., "html")`) instead of plain text, so section headers (`Fly.io Usage Estimate`, `Machines:`, `Network metrics`, `Excluded from this first estimate:`) render bold.
+- `Estimated compute total` now appears above the per-machine breakdown instead of below it.
+- The `Window:` line shows `mm/dd/yyyy` plus a 12-hour clock (e.g. `08/11/2026 9am`) instead of raw ISO timestamps, and is converted from UTC to a fixed GMT-6 offset for display. The underlying Prometheus query still uses the real UTC instant.
+
 ## [1.2] - 2026-08-11
 
 ### Fixed

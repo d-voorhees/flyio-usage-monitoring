@@ -8,11 +8,6 @@ import requests
 
 FLY_TOKEN = os.environ["FLY_TOKEN"]
 FLY_ORG_SLUG = os.environ["FLY_ORG_SLUG"]
-FLY_APPS = [
-    app.strip()
-    for app in os.environ["FLY_APPS"].split(",")
-    if app.strip()
-]
 
 EMAIL_FROM = os.environ["EMAIL_FROM"]
 EMAIL_TO = os.environ["EMAIL_TO"]
@@ -39,6 +34,18 @@ REQUEST_TIMEOUT = 30
 # Fixed GMT-6 offset for display in the email. Fly API calls still use
 # real UTC instants; only the report text is shown in this timezone.
 REPORT_TZ = timezone(timedelta(hours=-6))
+
+
+def get_apps(org_slug):
+    url = f"{FLY_API}/apps"
+    response = requests.get(
+        url,
+        headers=HEADERS,
+        params={"org_slug": org_slug},
+        timeout=REQUEST_TIMEOUT,
+    )
+    response.raise_for_status()
+    return [app["name"] for app in response.json().get("apps", [])]
 
 
 def get_machines(app_name):
@@ -136,7 +143,7 @@ def main():
 
     machine_rows = []
 
-    for app_name in FLY_APPS:
+    for app_name in get_apps(FLY_ORG_SLUG):
         machines = get_machines(app_name)
         for machine in machines:
             row = machine_estimate(machine)

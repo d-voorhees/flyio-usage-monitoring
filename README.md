@@ -6,7 +6,7 @@ Companion post: [Fly.io Doesn't Have a Daily Billing Endpoint, So I Built One](h
 
 ## What it does
 
-- Lists Machines for each configured Fly app through the Machines API.
+- Discovers every app in your Fly org through the Machines API, then lists Machines for each one.
 - Reads CPU count, memory allocation, and current Machine state.
 - Queries Fly Prometheus for network activity during the reporting window.
 - Estimates compute cost from CPU and memory rates you configure, not from anything hardcoded.
@@ -77,13 +77,14 @@ Create a read-only Fly token with `fly tokens create readonly`. Store the token 
 
 ## Configuration
 
+Every app that exists in `FLY_ORG_SLUG` at run time is included automatically — there's no separate app allowlist to maintain. Create a new Fly app and it shows up in the next report with no config change.
+
 Add the following values under **Settings → Secrets and variables → Actions**:
 
 | Secret | Purpose |
 |---|---|
 | `FLY_TOKEN` | Read-only Fly API token. |
-| `FLY_ORG_SLUG` | Organization slug used in the Prometheus URL. |
-| `FLY_APPS` | Comma-separated Fly app names. |
+| `FLY_ORG_SLUG` | Organization slug used to discover apps and query Prometheus. |
 | `CPU_RATE_PER_HOUR` | CPU rate used by the estimator. |
 | `MEMORY_RATE_PER_GB_HOUR` | Memory rate used by the estimator. |
 | `EMAIL_FROM` | SMTP sender address. |
@@ -126,7 +127,6 @@ The script connects over SSL to whatever `SMTP_HOST`/`SMTP_PORT` you configure, 
 ```bash
 export FLY_TOKEN="..."
 export FLY_ORG_SLUG="..."
-export FLY_APPS="app-one,app-two"
 export CPU_RATE_PER_HOUR="..."
 export MEMORY_RATE_PER_GB_HOUR="..."
 export EMAIL_FROM="..."
@@ -157,7 +157,7 @@ The scheduled job installs the pinned Python dependency and injects repository s
 
 ## First run and verification
 
-1. Push the repo and add all ten secrets (see Configuration).
+1. Push the repo and add all nine secrets (see Configuration).
 2. In the GitHub Actions tab, select the workflow and click **Run workflow** to trigger `workflow_dispatch` manually rather than waiting for the schedule.
 3. Confirm the email arrives and check the Action's run log for errors (auth failures, missing secrets, Prometheus query errors).
 4. Compare the estimated compute total in the email against the actual numbers on your Fly.io billing dashboard for the same window.

@@ -28,7 +28,6 @@ jobs:
         env:
           FLY_TOKEN: ${{ secrets.FLY_TOKEN }}
           FLY_ORG_SLUG: ${{ secrets.FLY_ORG_SLUG }}
-          FLY_APPS: ${{ secrets.FLY_APPS }}
           CPU_RATE_PER_HOUR: ${{ secrets.CPU_RATE_PER_HOUR }}
           MEMORY_RATE_PER_GB_HOUR: ${{ secrets.MEMORY_RATE_PER_GB_HOUR }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
